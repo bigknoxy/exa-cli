@@ -1,6 +1,6 @@
 {
   "name": "exa-cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "CLI wrapper for Exa MCP tools - search, crawl, and research from the command line",
   "author": "bigknoxy",
