@@ -19,12 +19,20 @@
 
 ## Phase 3: Advanced Features ✅ COMPLETE
 - [x] `exa research start/check` - Deep research
-- [x] Pagination for large results (via --num flag)
 - [x] Shell completion (bash, zsh, fish)
 - [x] Error handling with helpful messages
 
 ## Phase 4: Polish ✅ COMPLETE
 - [x] All commands verified working
 - [x] Documentation (README.md)
-- [x] Ready for npm publishing
-- [x] Version management (via package.json)
+- [x] Tests (54 tests, 100% pass rate)
+- [x] CI/CD (GitHub Actions)
+- [x] LICENSE, CHANGELOG, .gitignore
+- [x] Issue/PR templates
+
+## Release ✅ COMPLETE
+- [x] GitHub repo created: https://github.com/bigknoxy/exa-cli
+- [x] Branch protection (requires PR + approval)
+- [x] Release v0.1.0 created
+- [x] Install/uninstall scripts
+- [ ] npm publish (requires `npm login`)
