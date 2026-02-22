@@ -1,0 +1,55 @@
+{
+  "name": "exa-cli",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "CLI wrapper for Exa MCP tools - search, crawl, and research from the command line",
+  "author": "bigknoxy",
+  "license": "MIT",
+  "bin": {
+    "exa": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "exa",
+    "search",
+    "cli",
+    "mcp",
+    "web-search",
+    "code-search"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bigknoxy/exa-cli.git"
+  },
+  "bugs": "https://github.com/bigknoxy/exa-cli/issues",
+  "homepage": "https://github.com/bigknoxy/exa-cli#readme",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.26.0",
+    "chalk": "^5.4.0",
+    "citty": "^0.1.6",
+    "consola": "^3.4.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0",
+    "vitest": "^4.0.18"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "clean": "rm -rf dist",
+    "rebuild": "npm run clean && npm run build",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  }
+}
