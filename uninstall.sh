@@ -40,7 +40,7 @@ fi
 
 info "Uninstalling exa-cli..."
 
-if npm uninstall -g exa-cli 2>&1; then
+if npm uninstall -g @bigknoxy/exa-cli 2>&1; then
     success "exa-cli uninstalled successfully!"
     
     # Check for config

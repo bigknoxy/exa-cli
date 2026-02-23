@@ -1,10 +1,13 @@
 {
-  "name": "exa-cli",
+  "name": "@bigknoxy/exa-cli",
   "version": "0.1.1",
   "type": "module",
   "description": "CLI wrapper for Exa MCP tools - search, crawl, and research from the command line",
   "author": "bigknoxy",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "bin": {
     "exa": "./dist/index.js"
   },

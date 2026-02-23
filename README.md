@@ -1,8 +1,8 @@
-# exa-cli
+# @bigknoxy/exa-cli
 
-[![npm version](https://img.shields.io/npm/v/exa-cli.svg)](https://www.npmjs.com/package/exa-cli)
+[![npm version](https://img.shields.io/npm/v/@bigknoxy/exa-cli.svg)](https://www.npmjs.com/package/@bigknoxy/exa-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js Version](https://img.shields.io/node/v/exa-cli.svg)](https://nodejs.org)
+[![Node.js Version](https://img.shields.io/node/v/@bigknoxy/exa-cli.svg)](https://nodejs.org)
 
 A CLI wrapper for the [Exa MCP server](https://github.com/exa-labs/exa-mcp-server). Use Exa's powerful search, crawl, and research capabilities from the command line - optimized for LLM tool usage.
 
@@ -23,13 +23,13 @@ curl -fsSL https://raw.githubusercontent.com/bigknoxy/exa-cli/main/install.sh | 
 ### npm
 
 ```bash
-npm install -g exa-cli
+npm install -g @bigknoxy/exa-cli
 ```
 
 ### Run directly with npx
 
 ```bash
-npx exa-cli search "your query"
+npx @bigknoxy/exa-cli search "your query"
 ```
 
 ## Uninstall
@@ -41,7 +41,7 @@ curl -fsSL https://raw.githubusercontent.com/bigknoxy/exa-cli/main/uninstall.sh 
 Or with npm:
 
 ```bash
-npm uninstall -g exa-cli
+npm uninstall -g @bigknoxy/exa-cli
 ```
 
 > **Note**: The uninstall script will leave your config file (`~/.exarc`) in place. Remove it manually with `rm ~/.exarc` if desired.
