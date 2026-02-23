@@ -31,7 +31,7 @@ fi
 info "Installing exa-cli..."
 
 # Install globally
-if npm install -g exa-cli 2>&1; then
+if npm install -g @bigknoxy/exa-cli 2>&1; then
     success "exa-cli installed successfully!"
     echo ""
     info "Quick start:"
