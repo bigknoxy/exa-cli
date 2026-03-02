@@ -185,13 +185,18 @@ exa config clear             # Reset to defaults
 Generate shell completion scripts.
 
 ```bash
-# Bash
+# Auto-detect and install for current shell
+exa completion --install
+
+# Explicit shell
+exa completion bash --install
+
+# Dry-run to see what would happen
+exa completion --install --dry-run
+
+# Manual installation (output script to stdout)
 exa completion bash > /etc/bash_completion.d/exa
-
-# Zsh
 exa completion zsh > ~/.zsh/completions/_exa
-
-# Fish
 exa completion fish > ~/.config/fish/completions/exa.fish
 ```
 
