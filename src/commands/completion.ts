@@ -3,6 +3,9 @@
  */
 
 import { defineCommand } from 'citty'
+import { existsSync, mkdirSync, appendFileSync, writeFileSync, readFileSync } from 'node:fs'
+import { homedir } from 'node:os'
+import { join } from 'node:path'
 
 type Shell = 'bash' | 'zsh' | 'fish'
 
@@ -19,6 +22,86 @@ const SUBCOMMANDS = [
 ]
 
 const SUBCOMMANDS_LIST = SUBCOMMANDS.join(' ')
+
+const MARKER_BEGIN = '# exa-cli completion - begin'
+const MARKER_END = '# exa-cli completion - end'
+
+function detectShell(): Shell | null {
+  const shell = process.env.SHELL || ''
+  if (shell.includes('zsh')) return 'zsh'
+  if (shell.includes('bash')) return 'bash'
+  if (shell.includes('fish')) return 'fish'
+  return null
+}
+
+function getInstallPaths(shell: Shell): { targetFile: string; reloadCmd: string } {
+  const home = homedir()
+  
+  switch (shell) {
+    case 'bash':
+      return {
+        targetFile: join(home, '.bashrc'),
+        reloadCmd: 'source ~/.bashrc',
+      }
+    case 'zsh':
+      return {
+        targetFile: join(home, '.zfunc', '_exa'),
+        reloadCmd: 'autoload -U compinit && compinit',
+      }
+    case 'fish':
+      return {
+        targetFile: join(home, '.config', 'fish', 'completions', 'exa.fish'),
+        reloadCmd: 'fish_reload_completions (or restart fish)',
+      }
+  }
+}
+
+function isCompletionInstalled(shell: Shell, targetFile: string): boolean {
+  if (!existsSync(targetFile)) return false
+  
+  if (shell === 'bash') {
+    const content = readFileSync(targetFile, 'utf-8')
+    return content.includes(MARKER_BEGIN)
+  }
+  
+  return true
+}
+
+function installCompletion(shell: Shell, script: string, dryRun: boolean): void {
+  const { targetFile, reloadCmd } = getInstallPaths(shell)
+  
+  if (isCompletionInstalled(shell, targetFile)) {
+    console.log(`Completions already installed for ${shell}`)
+    console.log(`  File: ${targetFile}`)
+    return
+  }
+  
+  if (dryRun) {
+    console.log(`Would install ${shell} completions to:`)
+    console.log(`  ${targetFile}`)
+    console.log(`\nAfter installation, run:`)
+    console.log(`  ${reloadCmd}`)
+    return
+  }
+  
+  const home = homedir()
+  
+  if (shell === 'bash') {
+    const block = `\n${MARKER_BEGIN}\n${script}${MARKER_END}\n`
+    appendFileSync(targetFile, block)
+  } else {
+    const dir = join(home, shell === 'zsh' ? '.zfunc' : join('.config', 'fish', 'completions'))
+    if (!existsSync(dir)) {
+      mkdirSync(dir, { recursive: true })
+    }
+    writeFileSync(targetFile, script)
+  }
+  
+  console.log(`✓ ${shell} completions installed to:`)
+  console.log(`  ${targetFile}`)
+  console.log(`\nTo enable, run:`)
+  console.log(`  ${reloadCmd}`)
+}
 
 function generateBashCompletion(): string {
   return `# exa bash completion
@@ -134,6 +217,18 @@ _exa_completion() {
           return 0
           ;;
       esac
+      ;;
+    completion)
+      case "$prev" in
+        --install|-i)
+          return 0
+          ;;
+        --dry-run)
+          return 0
+          ;;
+      esac
+      COMPREPLY=($(compgen -W "bash zsh fish --install --dry-run -i" -- "$cur"))
+      return 0
       ;;
   esac
 
@@ -278,7 +373,12 @@ _exa() {
       _arguments "\${_search_opts[@]}" && ret=0
       ;;
     completion)
-      _arguments '1:shell:(bash zsh fish)' && ret=0
+      _arguments \
+        '1:shell:(bash zsh fish)' \
+        '--install[Install completions for current shell]' \
+        {-i,}'[Install completions for current shell]' \
+        '--dry-run[Show what would be done]' \
+        && ret=0
       ;;
   esac
   
@@ -388,6 +488,8 @@ complete -c exa -n '__fish_use_subcommand' -f -a 'completion'
 complete -c exa -n '__fish_seen_subcommand_from completion' -f -a 'bash' -d 'Bash completion'
 complete -c exa -n '__fish_seen_subcommand_from completion' -f -a 'zsh' -d 'Zsh completion'
 complete -c exa -n '__fish_seen_subcommand_from completion' -f -a 'fish' -d 'Fish completion'
+complete -c exa -n '__fish_seen_subcommand_from completion' -l install -s i -d 'Install completions for current shell'
+complete -c exa -n '__fish_seen_subcommand_from completion' -l dry-run -d 'Show what would be done'
 `
 }
 
@@ -399,8 +501,8 @@ export default defineCommand({
   args: {
     shell: {
       type: 'positional',
-      required: true,
-      description: 'Shell type (bash, zsh, fish)',
+      required: false,
+      description: 'Shell type (bash, zsh, fish). Auto-detected if omitted with --install.',
       value: (val: string) => {
         const validShells: Shell[] = ['bash', 'zsh', 'fish']
         if (!validShells.includes(val as Shell)) {
@@ -409,9 +511,42 @@ export default defineCommand({
         return val
       },
     },
+    install: {
+      type: 'boolean',
+      alias: 'i',
+      default: false,
+      description: 'Install completions for current shell (auto-detects shell)',
+    },
+    'dry-run': {
+      type: 'boolean',
+      default: false,
+      description: 'Show what would be done without making changes',
+    },
   },
   run({ args }) {
-    const shell = args.shell as Shell
+    const dryRun = args['dry-run'] as boolean
+    const doInstall = args.install as boolean
+    let shell = args.shell as Shell | undefined
+    
+    if (doInstall) {
+      if (!shell) {
+        const detected = detectShell()
+        if (!detected) {
+          console.error('Could not detect shell from $SHELL environment variable.')
+          console.error('Please specify a shell: exa completion <bash|zsh|fish> --install')
+          process.exit(1)
+        }
+        shell = detected
+        console.log(`Detected shell: ${shell}`)
+      }
+    } else {
+      if (!shell) {
+        console.error('Error: shell argument is required when not using --install')
+        console.error('Usage: exa completion <bash|zsh|fish>')
+        console.error('       exa completion --install')
+        process.exit(1)
+      }
+    }
     
     let completionScript: string
     
@@ -429,6 +564,10 @@ export default defineCommand({
         throw new Error(`Unsupported shell: ${shell}`)
     }
     
-    console.log(completionScript)
+    if (doInstall) {
+      installCompletion(shell, completionScript, dryRun)
+    } else {
+      console.log(completionScript)
+    }
   },
 })
