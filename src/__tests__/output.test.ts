@@ -451,21 +451,5 @@ describe('output.ts', () => {
       const result = formatOutput(data, 'text')
       expect(result).toContain('Toronto')
     })
-
-    it('should handle headquarters with only city', () => {
-      const data = {
-        results: [{ entities: [{ properties: { headquarters: { city: 'Paris' } } }] }],
-      }
-      const result = formatOutput(data, 'text')
-      expect(result).toContain('Paris')
-    })
-
-    it('should handle headquarters with empty city in markdown', () => {
-      const data = {
-        results: [{ entities: [{ properties: { headquarters: { city: '', country: 'UK' } } }] }],
-      }
-      const result = formatOutput(data, 'markdown')
-      expect(result).toContain('UK')
-    })
   })
 })

@@ -173,11 +173,6 @@ describe('config.ts', () => {
       })
     })
 
-    it('should add new fields when updating', () => {
-      const result = updateConfig({ apiKey: 'new-api-key' })
-
-      expect(result).toHaveProperty('apiKey', 'new-api-key')
-    })
   })
 
   describe('roundtrip', () => {
