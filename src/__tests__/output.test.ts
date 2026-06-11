@@ -212,9 +212,244 @@ describe('output.ts', () => {
       expect(result).toContain('Acme')
     })
 
+    it('should format company result in json format', () => {
+      const data = {
+        results: [
+          {
+            title: 'Acme Corp',
+            url: 'https://acme.com',
+            entities: [{ properties: { name: 'Acme Inc' } }],
+          },
+        ],
+      }
+      const result = formatOutput(data, 'json')
+      expect(() => JSON.parse(result)).not.toThrow()
+    })
+
+    it('should format company result in markdown format', () => {
+      const data = {
+        results: [
+          {
+            title: 'Acme Corp',
+            url: 'https://acme.com',
+            entities: [{ properties: { name: 'Acme Inc', headquarters: { city: 'NYC', country: 'USA' } } }],
+          },
+        ],
+      }
+      const result = formatOutput(data, 'markdown')
+      expect(result).toContain('# Acme Inc')
+    })
+
+    it('should handle company result with only title (no entities)', () => {
+      const data = {
+        results: [
+          { title: 'NoEntity', url: 'https://example.com' },
+        ],
+      }
+      const result = formatOutput(data, 'text')
+      expect(result).toContain('NoEntity')
+    })
+
+    it('should handle company result with employees in text format', () => {
+      const data = {
+        results: [
+          {
+            entities: [{ properties: { name: 'EmplCo', workforce: { total: 5000 } } }],
+          },
+        ],
+      }
+      const result = formatOutput(data, 'text')
+      expect(result).toContain('EmplCo')
+      expect(result).toContain('5,000')
+    })
+
+    it('should handle company result with empty city in markdown', () => {
+      const data = {
+        results: [
+          {
+            entities: [{ properties: { name: 'HQCo', headquarters: { city: '', country: 'UK' } } }],
+          },
+        ],
+      }
+      const result = formatOutput(data, 'markdown')
+      expect(result).toContain('UK')
+    })
+
+    it('should handle company result with truncated description', () => {
+      const data = {
+        results: [
+          {
+            entities: [{ properties: { description: 'A'.repeat(500) } }],
+          },
+        ],
+      }
+      const result = formatOutput(data, 'text')
+      expect(result).toContain('...')
+    })
+
+    it('should handle search result with no url in markdown', () => {
+      const results = [{ title: 'NoUrl', url: '', text: 'Content' }]
+      const result = formatSearchResults(results as any, 'markdown')
+      expect(result).toContain('NoUrl')
+    })
+
+    it('should handle company result with employees in markdown', () => {
+      const data = {
+        results: [
+          {
+            entities: [{ properties: { workforce: { total: 5000 } } }],
+          },
+        ],
+      }
+      const result = formatOutput(data, 'markdown')
+      expect(result).toContain('Employees')
+    })
+
+    it('should handle company result with revenue in markdown', () => {
+      const data = {
+        results: [
+          {
+            entities: [{ properties: { financials: { revenueAnnual: 1000000000 } } }],
+          },
+        ],
+      }
+      const result = formatOutput(data, 'markdown')
+      expect(result).toContain('Revenue')
+    })
+
+    it('should handle company result with funding in markdown', () => {
+      const data = {
+        results: [
+          {
+            entities: [{ properties: { financials: { fundingTotal: 500000000 } } }],
+          },
+        ],
+      }
+      const result = formatOutput(data, 'markdown')
+      expect(result).toContain('Funding')
+    })
+
+    it('should format company result with no result', () => {
+      const data = { results: [] }
+      const result = formatOutput(data, 'text')
+      expect(result).toBe('No results found.')
+    })
+
+    it('should handle API result with no title', () => {
+      const data = {
+        results: [{ url: 'https://example.com', text: 'Content' }],
+      }
+      const result = formatOutput(data, 'text')
+      expect(result).toContain('Untitled')
+    })
+
+    it('should handle search result with no url', () => {
+      const results = [{ title: 'NoUrl', url: '', text: 'Content' }]
+      const result = formatSearchResults(results as any, 'text')
+      expect(result).toContain('NoUrl')
+    })
+
     it('should handle plain string input', () => {
       const result = formatOutput('Just a plain string', 'text')
       expect(result).toBe('Just a plain string')
+    })
+
+    it('should handle company result with no url in markdown', () => {
+      const data = {
+        results: [{ entities: [{ properties: { name: 'NoUrlCo' } }] }],
+      }
+      const result = formatOutput(data, 'markdown')
+      expect(result).toContain('# NoUrlCo')
+    })
+
+    it('should handle company result without description branch', () => {
+      const data = {
+        results: [{ entities: [{ properties: { name: 'NoDescCo' } }] }],
+      }
+      const result = formatOutput(data, 'text')
+      expect(result).toContain('NoDescCo')
+    })
+
+    it('should handle company result with url in markdown', () => {
+      const data = {
+        results: [{ url: 'https://test.com', entities: [{ properties: { name: 'UrlCo' } }] }],
+      }
+      const result = formatOutput(data, 'markdown')
+      expect(result).toContain('**URL:**')
+    })
+
+    it('should handle company result with description in markdown', () => {
+      const data = {
+        results: [{ entities: [{ properties: { name: 'DescCo', description: 'A description' } }] }],
+      }
+      const result = formatOutput(data, 'markdown')
+      expect(result).toContain('A description')
+    })
+
+    it('should handle content without text item', () => {
+      const data = {
+        content: [{ type: 'other', text: 'ignored' }],
+      }
+      const result = formatOutput(data, 'text')
+      expect(result).toContain('other')
+    })
+
+    it('should handle parseExaFormat with urlMatch only', () => {
+      const text = 'URL: https://test.com\nText: Some text without Title'
+      const result = formatOutput(text, 'text')
+      expect(result).toContain('https://test.com')
+    })
+
+    it('should handle company result with headquarters in text format', () => {
+      const data = {
+        results: [{ entities: [{ properties: { headquarters: { country: 'Canada' } } }] }],
+      }
+      const result = formatOutput(data, 'text')
+      expect(result).toContain('HQ:')
+    })
+
+    it('should handle API result with no url branch', () => {
+      const data = {
+        results: [{ title: 'NoUrlTitle', text: 'Some text' }],
+      }
+      const result = formatOutput(data, 'text')
+      expect(result).toContain('NoUrlTitle')
+    })
+
+    it('should handle publishedDate branch', () => {
+      const text = 'Title: Dated\nPublished Date: 2024-01-15\nText: Content'
+      const result = formatOutput(text, 'text')
+      expect(result).toContain('2024-01-15')
+    })
+
+    it('should handle text fallback when no Text match', () => {
+      const text = 'Title: NoTextMatch\n\nContent without Text: marker'
+      const result = formatOutput(text, 'text')
+      expect(result).toContain('NoTextMatch')
+    })
+
+    it('should handle headquarters in markdown format', () => {
+      const data = {
+        results: [{ entities: [{ properties: { headquarters: { city: 'Toronto', country: 'Canada' } } }] }],
+      }
+      const result = formatOutput(data, 'markdown')
+      expect(result).toContain('HQ:')
+    })
+
+    it('should handle empty headquarters city in text format', () => {
+      const data = {
+        results: [{ entities: [{ properties: { headquarters: { city: '', country: 'Canada' } } }] }],
+      }
+      const result = formatOutput(data, 'text')
+      expect(result).toContain('Canada')
+    })
+
+    it('should handle headquarters in text format', () => {
+      const data = {
+        results: [{ entities: [{ properties: { headquarters: { city: 'Toronto', country: 'Canada' } } }] }],
+      }
+      const result = formatOutput(data, 'text')
+      expect(result).toContain('Toronto')
     })
   })
 })

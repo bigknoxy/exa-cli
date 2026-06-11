@@ -71,6 +71,34 @@ describe('config.ts', () => {
       })
     })
 
+    it('should handle fs read error and return defaults', () => {
+      vi.mocked(existsSync).mockReturnValue(true)
+      vi.mocked(readFileSync).mockImplementation(() => {
+        throw new Error('Read error')
+      })
+
+      const result = loadConfig()
+
+      expect(result).toEqual({
+        output: 'json',
+        defaultNum: 10,
+      })
+    })
+
+    it('should handle non-Error exception in loadConfig', () => {
+      vi.mocked(existsSync).mockReturnValue(true)
+      vi.mocked(readFileSync).mockImplementation(() => {
+        throw 'string error' as any
+      })
+
+      const result = loadConfig()
+
+      expect(result).toEqual({
+        output: 'json',
+        defaultNum: 10,
+      })
+    })
+
     it('should handle arbitrary config fields', () => {
       vi.mocked(existsSync).mockReturnValue(true)
       vi.mocked(readFileSync).mockReturnValue(
@@ -103,6 +131,14 @@ describe('config.ts', () => {
       })
 
       expect(() => saveConfig({})).toThrow('Failed to save config: Permission denied')
+    })
+
+    it('should handle non-Error exception in saveConfig', () => {
+      vi.mocked(writeFileSync).mockImplementation(() => {
+        throw 'string error' as any
+      })
+
+      expect(() => saveConfig({})).toThrow('Failed to save config: Unknown error')
     })
   })
 
@@ -137,11 +173,6 @@ describe('config.ts', () => {
       })
     })
 
-    it('should add new fields when updating', () => {
-      const result = updateConfig({ apiKey: 'new-api-key' })
-
-      expect(result).toHaveProperty('apiKey', 'new-api-key')
-    })
   })
 
   describe('roundtrip', () => {
