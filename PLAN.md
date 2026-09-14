@@ -34,10 +34,9 @@ A CLI tool that wraps the Exa MCP server, providing all Exa search capabilities 
 - **Optional**: API key via `--api-key`, env var, or config file for higher limits
 
 ### Output Formats
-- `--json` - Raw JSON output
-- `--text` - Human readable (default)
-- `--markdown` - Markdown formatted
-- `--quiet` - Just URLs/titles
+- `--format text` - Human readable (default)
+- `--format json` - Raw JSON output for scripting
+- `--format markdown` - Markdown formatted with links
 
 ---
 
@@ -55,14 +54,21 @@ exa-cli/
 │   │   ├── crawl.ts          # crawling_exa
 │   │   ├── company.ts        # company_research_exa
 │   │   ├── people.ts         # people_search_exa
-│   │   └── research.ts       # deep_researcher_start/check
+│   │   ├── research.ts       # deep_researcher_start/check
+│   │   ├── config.ts         # Configuration management
+│   │   └── completion.ts     # Shell completion (bash, zsh, fish)
 │   ├── lib/
 │   │   ├── mcp-client.ts     # MCP connection management
 │   │   ├── output.ts         # Formatting helpers
 │   │   └── config.ts         # Config file management
+│   ├── __tests__/            # Test suite (vitest 5)
+│   │   ├── config.test.ts
+│   │   ├── output.test.ts
+│   │   └── vitest5-compat.test.ts
 │   └── types.ts              # Shared types
 ├── package.json
 ├── tsconfig.json
+├── vitest.config.ts
 └── README.md
 ```
 
@@ -74,7 +80,8 @@ exa-cli/
 | MCP Client | `@modelcontextprotocol/sdk` | Official SDK |
 | Validation | `zod` | SDK peer dependency |
 | Output | `consola` + `chalk` | Matches Citty ecosystem |
-| Runtime | Node.js 18+ / Bun | ESM modules |
+| Testing | **vitest 5** + @vitest/coverage-v8 | Fast, Vite-native, coverage built-in |
+| Runtime | Node.js 22.12+ | Required by vitest 5 |
 
 ### MCP Connection Strategy
 
@@ -106,16 +113,17 @@ await client.connect(transport)
 | `exa search-advanced <query>` | `web_search_advanced_exa` | Full filter support |
 
 ### Decisions
-- **Runtime**: Support both Node.js 18+ and Bun
+- **Runtime**: Node.js 22.12+ required (vitest 5 constraint)
 - **API Mode**: MCP only (free tier default, API key optional for higher limits)
-- **Output**: Human-readable text default, with `--json` and `--markdown` flags
+- **Output**: Human-readable text default, with `--format json` and `--format markdown` flags
+- **Testing**: vitest 5 with clearMocks: true and coverage thresholds
 
 ### CLI Interface Design
 
 ```bash
 # Web Search (default tool)
 exa search "latest AI news 2026" --num 10
-exa search "nvidia stock" --type fast --json
+exa search "nvidia stock" --type fast --format json
 
 # Code Search
 exa code "React useState hook TypeScript" --tokens 3000
@@ -149,36 +157,38 @@ exa config set output json
 
 ## Roadmap
 
-### Phase 1: MVP (Week 1)
-- [ ] Project setup (Citty, TypeScript, ESM)
-- [ ] MCP client connection module
-- [ ] `exa search` - Basic web search
-- [ ] `exa code` - Code search
-- [ ] `exa crawl` - URL crawling
-- [ ] JSON and text output formats
-- [ ] Free tier (no auth)
+### Phase 1: MVP ✅ COMPLETE
+- [x] Project setup (Citty, TypeScript, ESM)
+- [x] MCP client connection module
+- [x] `exa search` - Basic web search
+- [x] `exa code` - Code search
+- [x] `exa crawl` - URL crawling
+- [x] JSON and text output formats
+- [x] Free tier (no auth)
 
-### Phase 2: Core Features (Week 2)
-- [ ] `exa company` - Company research
-- [ ] `exa people` - People search
-- [ ] `exa search-advanced` - With filters
-- [ ] Config file support (`~/.exarc`)
-- [ ] API key support (--api-key, env var)
-- [ ] Markdown output format
+### Phase 2: Core Features ✅ COMPLETE
+- [x] `exa company` - Company research
+- [x] `exa people` - People search
+- [x] `exa search-advanced` - With filters
+- [x] Config file support (`~/.exarc`)
+- [x] API key support (--api-key, env var)
+- [x] Markdown output format
 
-### Phase 3: Advanced Features (Week 3)
-- [ ] `exa research start/check` - Deep research
-- [ ] Pagination for large results
-- [ ] Streaming output for long operations
-- [ ] Shell completion (bash, zsh, fish)
-- [ ] Error handling with helpful messages
+### Phase 3: Advanced Features ✅ COMPLETE
+- [x] `exa research start/check` - Deep research
+- [x] Pagination for large results
+- [x] Streaming output for long operations
+- [x] Shell completion (bash, zsh, fish)
+- [x] Error handling with helpful messages
 
-### Phase 4: Polish (Week 4)
-- [ ] Test coverage
-- [ ] Documentation
-- [ ] npm publishing
-- [ ] CI/CD setup
-- [ ] Version management
+### Phase 4: Polish ✅ COMPLETE
+- [x] Test coverage (61 tests, 100% pass rate)
+- [x] Documentation (README.md, AGENTS.md, CHANGELOG.md)
+- [x] npm publishing
+- [x] CI/CD (GitHub Actions with Node 22)
+- [x] Version management
+- [x] Branch protection with required status checks
+- [x] Dependabot with vitest grouping
 
 ---
 
@@ -187,15 +197,18 @@ exa config set output json
 ```json
 {
   "dependencies": {
-    "citty": "^0.1.6",
-    "consola": "^3.4.0",
     "@modelcontextprotocol/sdk": "^1.26.0",
-    "zod": "^3.24.0",
-    "chalk": "^5.4.0"
+    "citty": "^0.2.2",
+    "consola": "^3.4.0",
+    "chalk": "^6.0.0",
+    "zod": "^4.5.4"
   },
   "devDependencies": {
+    "@types/node": "^26.5.0",
+    "@vitest/coverage-v8": "^5.0.0",
+    "tsx": "^4.19.0",
     "typescript": "^5.7.0",
-    "bun-types": "latest"
+    "vitest": "^5.0.0"
   }
 }
 ```
