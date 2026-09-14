@@ -22,10 +22,11 @@ if ! command -v npm >/dev/null 2>&1; then
     error "npm is required but not installed. Please install Node.js first: https://nodejs.org"
 fi
 
-# Check Node.js version (need 18+)
-NODE_VERSION=$(node -e "console.log(process.versions.node.split('.')[0])")
-if [ "$NODE_VERSION" -lt 18 ]; then
-    error "Node.js 18+ is required. You have Node.js $(node -v). Please upgrade."
+# Check Node.js version (need 22.12+)
+NODE_MAJOR=$(node -e "console.log(process.versions.node.split('.')[0])")
+NODE_MINOR=$(node -e "console.log(process.versions.node.split('.')[1])")
+if [ "$NODE_MAJOR" -lt 22 ] || { [ "$NODE_MAJOR" -eq 22 ] && [ "$NODE_MINOR" -lt 12 ]; }; then
+    error "Node.js 22.12+ is required. You have Node.js $(node -v). Please upgrade."
 fi
 
 info "Installing exa-cli..."
