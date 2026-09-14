@@ -9,15 +9,16 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-// Create shared mocks to test clearMocks behavior across test boundaries
-const mockFn = vi.fn()
-
 describe('vitest 5 clearMocks compatibility', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
   describe('falsifier: clearMocks clears cross-test mock state', () => {
+    // Shared mock scoped to this describe block only — tests depend on
+    // sequential execution within the describe, which vitest guarantees.
+    const mockFn = vi.fn()
+
     it('test A: sets mock state', () => {
       mockFn('hello')
       mockFn('world')
@@ -43,6 +44,7 @@ describe('vitest 5 clearMocks compatibility', () => {
 
   describe('anti-falsifier: mock state preserved within single test', () => {
     it('tracks multiple calls within one test correctly', () => {
+      const mockFn = vi.fn()
       mockFn('first')
       mockFn('second')
       mockFn('third')
@@ -78,28 +80,6 @@ describe('vitest 5 clearMocks compatibility', () => {
       expect(flexible()).toBe('changed')
 
       expect(flexible).toHaveBeenCalledTimes(2)
-    })
-  })
-
-  describe('config module mock isolation', () => {
-    // This specifically tests that our config.test.ts pattern
-    // (vi.mock + vi.clearAllMocks in beforeEach) works correctly
-    // with vitest 5's clearMocks: true default.
-    it('proves mocks are isolated: first test sets state', () => {
-      const isolatedMock = vi.fn()
-      isolatedMock('setting', 'state')
-      expect(isolatedMock).toHaveBeenCalledTimes(1)
-    })
-
-    it('proves mocks are isolated: second test sees no leak', () => {
-      // If mocks leaked, isolatedMock from the test above would have 1 call
-      // But we're creating a new vi.fn() so this is inherently isolated
-      // This test is a structural guarantee that the test suite
-      // doesn't depend on test ordering
-      const anotherMock = vi.fn()
-      expect(anotherMock).toHaveBeenCalledTimes(0)
-      anotherMock('fresh')
-      expect(anotherMock).toHaveBeenCalledTimes(1)
     })
   })
 })
