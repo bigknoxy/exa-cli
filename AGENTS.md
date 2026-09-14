@@ -1,13 +1,14 @@
 # AI Coding Agent Guidelines for exa-cli
 
 ## Overview
-CLI wrapper for Exa MCP server. Stack: citty (CLI), consola (logging), chalk (colors). Node 18+, ESM required.
+CLI wrapper for Exa MCP server. Stack: citty (CLI), consola (logging), chalk (colors). Node 22.12+, ESM required.
 
 ## Structure
 ```
 src/
   commands/      # CLI commands
   lib/           # Utilities (mcp-client.ts, output.ts, config.ts)
+  __tests__/     # Test files (vitest 5)
   index.ts       # Entry point
   types.ts       # Shared types (OutputFormat, ExaConfig, SearchResult)
 ```
@@ -92,6 +93,13 @@ export default defineCommand({
 ## Build/Test
 ```bash
 npm run build          # Compile to ./dist
-npx vitest run src/__tests__/output.test.ts
+npm test               # Run all tests (vitest 5)
+npx vitest run src/__tests__/output.test.ts  # Single test file
 npx tsc --noEmit       # Type check
 ```
+
+## Testing
+- Framework: vitest 5 (requires Node.js >= 22.12)
+- Config: `vitest.config.ts` with `globals: true`, `clearMocks: true`
+- 61 tests across 3 test files
+- Coverage thresholds: 85% branches, 90% functions, 95% lines/statements

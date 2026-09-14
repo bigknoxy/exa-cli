@@ -24,15 +24,27 @@
 
 ## Phase 4: Polish ✅ COMPLETE
 - [x] All commands verified working
-- [x] Documentation (README.md)
-- [x] Tests (54 tests, 100% pass rate)
-- [x] CI/CD (GitHub Actions)
+- [x] Documentation (README.md, AGENTS.md, CHANGELOG.md, PLAN.md)
+- [x] Tests (61 tests, 100% pass rate)
+- [x] CI/CD (GitHub Actions, Node 22, vitest 5)
+- [x] Branch protection with required status checks
+- [x] Dependabot with vitest grouping
 - [x] LICENSE, CHANGELOG, .gitignore
-- [x] Issue/PR templates
 
 ## Release ✅ COMPLETE
 - [x] GitHub repo created: https://github.com/bigknoxy/exa-cli
-- [x] Branch protection (requires PR + approval)
+- [x] Branch protection (requires PR + status checks)
 - [x] Release v0.1.0 created
 - [x] Install/uninstall scripts
-- [ ] npm publish (requires `npm login`)
+- [ ] npm publish v0.2.0 (requires `npm login`)
+
+## Maintenance
+- [x] Upgraded vitest 4 → 5 (with @vitest/coverage-v8)
+- [x] Raised Node.js minimum from 18 → 22.12
+- [x] Removed unused c8 devDependency
+- [x] Fixed CI coverage job (removed redundant second run)
+- [x] Added dist/ exclusion to vitest config
+- [x] Added clearMocks: true to vitest config
+- [x] Updated install.sh for Node 22.12+ version check
+- [x] Closed stale Dependabot PRs (#1, #23, #24, #25)
+- [x] Merged safe Dependabot bumps (#27, #28, #29)
