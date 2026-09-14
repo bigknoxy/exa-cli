@@ -247,7 +247,7 @@ npm run dev search "test query"
 
 ## Requirements
 
-- Node.js 18+
+- Node.js 22.12+
 - npm or bun
 
 ## License
